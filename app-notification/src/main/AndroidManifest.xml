@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="gaml.notification">
+
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SET_ALARM" />
+    <application>
+        <meta-data
+            android:name="org.godotengine.plugin.v1.AppNotification"
+            android:value="gaml.notification.AppNotificationPlugin" />
+        <receiver android:name="gaml.notification.NotificationReceiver" android:process=":remote" />
+    </application>
+
+</manifest>
