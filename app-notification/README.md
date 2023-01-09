@@ -8,7 +8,7 @@ To understand more about the Notification feature in android, go through the [do
 
 ### Basic Usage:
 
-To access the plugin you have to use the standard code for Godot plugin
+To access the plugin you have to use the standard code for Godot plugin in the code
 
 ```gdscript
 # Check if the plugin is available
@@ -27,8 +27,8 @@ Example of usage of various features can be referred in the file *[usage/notific
 Shows a notification immediately. 
   
 Note: CHANNEL_ID can be blank. If CHANNEL_ID is blank:
-* For android devices with api Level 26(O) or higher a DEFAULT channel will be created for notification.
-* For android devices with api level lower than 26(O), the channel id is ignored even if channel_id is provided.
+* For android devices with api Level 26(Oreo) or higher a DEFAULT channel will be created for notification.
+* For android devices with api level lower than 26(Oreo), the channel id is ignored even if channel_id is provided.
 This is applicable for other notification APIs a;so
 
 **Usage:**
@@ -105,47 +105,85 @@ You can customise the following:
 ### APIs
 
 **Methods**
-- getDefaultChannelId() - returns the id of the default channel
-  - **@return Id** of the default channel
+- **getDefaultChannelId()**
+  Gets the id of the default channel
+  
+  **Parameters**
+  - None
+  
+  **Returns:**
+  - **[String]** Id of the default channel
 
-- setupNotificationChannel() -  Creates a notification channel. It will work with android api version 26 and higher.If this is called in different version of OS, then INCOMPATIBLE_OS_VERSION (-1) is returned.
-  - **@param channelId [String]** Unique Id of the channel
-  - **@param channelName [String]** Display name of the channel
-  - **@param importance [Int]** the importance of the messages through this channel. See [NotificationManager].IMPORTANCE_* for possible values
-  - **@param channelDescription [String]** a descriptive text about the channel
-  - **@return [Int]** NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1), CHANNEL_ALREADY_EXISTS(1)
+- **setupNotificationChannel(channelId, channelName, importance, channelDescription)** 
+  Creates a notification channel. For devices with android api version 26 and higher a channel will be created.
+  
+  **Parameters**
+  - **channelId [String]** Unique Id of the channel
+  - **channelName [String]** Display name of the channel
+  - **importance [Int]** the importance of the messages through this channel. See [NotificationManager].IMPORTANCE_* for possible values
+  - **channelDescription [String]** a descriptive text about the channel
+  
+  **Returns:**
+  - **[Int]** NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1) or CHANNEL_ALREADY_EXISTS(1)
 
-- setChannelCustomOptions() - Setup the channel customization to customize icons and notification color.Any customization not provided (i.e blank) will take up default values.
-  - **@param channelId [String]** the channel id on which the customization is applied
-  - **@param showWhen** [Boolean]will display showWhen or not
-  - **@param smallIconId [String]** displays the small notification icon for the channel
-  - **@param largeIconId [String]** displays the large icon for the channel
-  - **@param colorId colorizes [String]** the small notification Icon
-  - **@return [Int]** NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1) and NO_CHANNEL_AVAILABLE(2)
+- **setChannelCustomOptions(channelId, showWhen, smallIconId, largeIconId, colorId)**
+  Setup the channel customization to customize icons and notification color. Any customization not provided (i.e blank) will take up default values.
+  
+  **Parameters**
+  - **channelId [String]** the channel id on which the customization is applied
+  - **showWhen [Boolean]** will display showWhen or not
+  - **smallIconId [String]** displays the small notification icon for the channel
+  - **largeIconId [String]** displays the large icon for the channel
+  - **colorId [String]** colorid of the color of the small notification Icon
+  
+  **Returns:**
+  - **[Int]** NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1) or NO_CHANNEL_AVAILABLE(2)
 
-- showNotification() - Shows a Notification immediately
-  - **@param channelId [String]** the id of the channel the notification has to be sent
-  - **@param notificationId [Int]** the unique id of the notification (can be used to cancel also)
-  - **@param title [String]** the title of the notification
-  - **@param message [String]** the message of the notification
 
-- showNotificationAfter() - Shows a notification after a certain time, only once. 
-  - **@param channelId [String]** the id of the channel the notification has to be sent
-  - **@param notificationId [Int]** the unique id of the notification (can be used to cancel also)
-  - **@param interval [Int]** the amount of time(in seconds) after which the notification will be sent. It is an approximate value depending upon the device state.
-  - **@param title [String]** the title of the notification
-  - **@param message [String]** the message of the notification
+- **showNotification(channelId, notificationId, title, message)**
+  Shows a Notification immediately
 
-- setupRepeatingNotification() - Sets up a repeating notification schedule
-  - **@param channelId [String]** the id of the channel the notification has to be sent
-  - **@param notificationId [Int]** the unique id of the notification (can be used to cancel also)
-  - **@param interval [Int]** the amount of time(in Seconds) after which the Notification repetition will start.
-  - **@param repeat_duration [Int]** the duration after which the notification will happen again.It is an approximate value depending upon the device state
-  - **@param title [String]** the title of the notification
-  - **@param message [String]** the message of the notification
+  **Parameters**
+  - **channelId [String]** the id of the channel the notification has to be sent
+  - **notificationId [Int]** the unique id of the notification (can be used to cancel also)
+  - **title [String]** the title of the notification
+  - **message [String]** the message of the notification
+  
+  **Returns:**
+  - None
+  
+- **showNotificationAfter(channelId, notificationId, delay, title, message)** 
+  Shows a notification after a certain time, only once. 
+  
+  **Parameters**
+  - **channelId [String]** the id of the channel the notification has to be sent
+  - **notificationId [Int]** the unique id of the notification (can be used to cancel also)
+  - **delay [Int]** the amount of time(in seconds) after which the notification will be sent. It is an approximate value depending upon the device state.
+  - **title [String]** the title of the notification
+  - **message [String]** the message of the notification
+  
+  **Returns:**
+  - None
+  
 
-- cancelNotification - Cancels any pending notification. It may be one time or it may be repeating.
-  - **@param notificationId [Int]** the id of the notification to be cancelled
+- **setupRepeatingNotification(channelId, notificationId, delay, interval, title, message)**
+  Sets up a repeating notification schedule
+
+  **Parameters**
+  - **channelId [String]** the id of the channel the notification has to be sent
+  - **notificationId [Int]** the unique id of the notification (can be used to cancel also)
+  - **delay [Int]** the amount of time(in Seconds) after which the Notification repetition will start.
+  - **interval [Int]** the duration after which the notification will happen again. It is an approximate value depending upon the device state
+  - **title [String]** the title of the notification
+  - **message [String]** the message of the notification
+  
+  **Returns:**
+  - None
+  
+- **cancelNotification(notificationId)**
+  Cancels any pending notification. It may be one time or it may be repeating.
+  **Parameters**
+  - **notificationId [Int]** the id of the notification to be cancelled
 
 
 **Signals**
@@ -153,8 +191,8 @@ You can customise the following:
 
 ### Developer Notes:
 
-    - Android SDK (23 - 32) but some features are restricted as per the versions
-    - Java/JDK 11 
-    - Kotlin 1.6.21
+    - Android SDK:  Minimum - 23, Target - 32
+    - Java/JDK: 11 
+    - Kotlin: 1.6.21 (Minimum)
 
   

@@ -3,7 +3,9 @@ package gaml.google.play.review
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.play.core.review.model.ReviewErrorCode
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
@@ -45,10 +47,11 @@ class GooglePlayReviewPlugin(godot: Godot): GodotPlugin(godot) {
                     }
 
                 } else {
+                    @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
                     // Since the Review flow error handling is erroneous in Play library,
                     // currently implemented as hardcoded error value of 1
                     // Will be fixed when review flow is fixed
-                    emitSignal("flow_launch_error", 1)
+                    emitSignal("flow_launch_error", reviewErrorCode)
 
                     // As a fail over launch on the play store/website
                     launchReviewInStore()

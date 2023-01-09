@@ -1,6 +1,7 @@
 # Google Play Review 
 
 GooglePlayReview is an android plugin for Godot Game engine.
+
 It allows the user to integrate review or rating of the app in google play store to be accessible inside the app as in-app review or provides a way to open the GooglePlay App/Browser to review the app in play store itself.
 
 ### Basic Usage:
@@ -43,10 +44,8 @@ if Engine.has_singleton("GooglePlayReview"):
 **Limitations:**
 
 - Sometimes nothing happens on invoking the flow:
-  It is a very common problem, please ensure you go through the google play in-app review process to understand more and work accordingly. It may not be code error.
+  It is a very common problem, which mostly happens due to number of review submitted limitations by Google play. Please ensure you go through the google play in-app review process to understand more and work accordingly.
 
-- No much error info for launch failure:
-  It is due to multiple reasons, and I hope to fix it soon.
 
 
 #### 2. InStore Review:
@@ -69,21 +68,39 @@ if Engine.has_singleton("GooglePlayReview"):
 ### APIs
 
 **Methods**
-  - launchInAppReview() - Launches the in-app review flow
-  - launchInStoreReview() - Launches the google play app and opens the app for providing review.
 
+- **launchInAppReview()**
+  Launches the in-app review flow
+  
+  **Parameters**
+  - None
+  
+  **Returns:**
+  - None
+
+ - **launchInStoreReview()**
+    Launches the google play app and opens the app for providing review.
+    
+    **Parameters**
+    - None
+    
+    **Returns:**
+    - None
+  
 
 **Signals**
-  - flow_completed - Raised when the review flow is completed. It is called only for InApp Review flow.
-  - flow_launch_error - Raised when the review flow launch failed. It is called only for InApp Review flow. This will not be raised if the review launch was successful but window did not show.
+  - **flow_completed** 
+    Raised when the review flow is completed. It is called only for InApp Review flow.
+  - **flow_launch_error**
+    Raised when the review flow launch failed. It is called only for InApp Review flow. This will not be raised if the review launch was successful but window did not show.
 
 
 
 ### Developer Notes:
 
-    - Android SDK (23 - 32)
-    - Java/JDK 11 
-    - Kotlin 1.6.21
+    - Android SDK:  Minimum - 23, Target - 32
+    - Java/JDK: 11 
+    - Kotlin: 1.6.21 (Minimum)
     - Libraries dependencies:
-      - com.google.android.play:review:2.0.0
+      - com.google.android.play:review:2.0.1
   

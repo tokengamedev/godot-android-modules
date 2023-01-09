@@ -1,5 +1,3 @@
-import kotlinx.coroutines.test.withTestContext
-
 plugins{
     id("com.android.library")
     kotlin("android")
@@ -53,6 +51,6 @@ apply<GdapPlugin>()
 
 dependencies{
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.core:core-ktx:1.9.0")
     implementation(kotlin("stdlib", "1.6.21"))
 }

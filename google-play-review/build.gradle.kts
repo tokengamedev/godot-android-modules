@@ -1,5 +1,3 @@
-import kotlinx.coroutines.test.withTestContext
-
 plugins{
     id("com.android.library")
     kotlin("android")
@@ -19,7 +17,7 @@ extra.apply {
     set("outputLocation",  "${rootDir}/bin")
     set("moduleName", "GooglePlayReview")
     set("binary_type", "local")
-    set("remoteDependencies", "\"com.google.android.play:review:2.0.0\"")
+    set("remoteDependencies", "\"com.google.android.play:review:2.0.1\"")
 
 }
 
@@ -51,8 +49,8 @@ apply<GdapPlugin>()
 
 dependencies{
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.core:core-ktx:1.9.0")
     implementation(kotlin("stdlib", "1.6.21"))
-    implementation("com.google.android.play:review:2.0.0")
-    implementation("com.google.android.play:review-ktx:2.0.0")
+    implementation("com.google.android.play:review:2.0.1")
+    implementation("com.google.android.play:review-ktx:2.0.1")
 }
