@@ -8,7 +8,7 @@ apply {
 
 // Version of the Module. It will be used for creating file
 // file name = "{moduleName}.{project.version}.{build_type/variant}.aar"
-version = "1.0.0"
+version = "1.1.0"
 
 // all the build outputs under one location
 setBuildDir("${rootProject.buildDir}/${project.name}")

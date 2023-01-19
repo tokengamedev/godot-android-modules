@@ -2,11 +2,11 @@
 
 AppNotification is an android plugin for Godot Game engine.
 
-It enables the app made in Godot to notify the end-user outside the app in android devices. It only supports Local notification.
+It enables the app made in Godot to notify the end-user outside the app in android devices.
 
 To understand more about the Notification feature in android, go through the [documentation](https://developer.android.com/guide/topics/ui/notifiers/notifications).
 
-### Basic Usage:
+## Basic Usage:
 
 To access the plugin you have to use the standard code for Godot plugin in the code
 
@@ -18,130 +18,182 @@ if Engine.has_singleton("AppNotification"):
     var notification_plugin = Engine.get_singleton("AppNotification")    
 ```
 
-### Features:
-
 Example of usage of various features can be referred in the file *[usage/notification_manager.md](usage/notification_manager.gd)*
 
-#### 1. Immediate Notification:
+## Features:
 
-Shows a notification immediately. 
+### 1. Posting Notification:
+
+#### a. Immediate Notification
+Show a notification immediately. 
   
-Note: CHANNEL_ID can be blank. If CHANNEL_ID is blank:
-* For android devices with api Level 26(Oreo) or higher a DEFAULT channel will be created for notification.
-* For android devices with api level lower than 26(Oreo), the channel id is ignored even if channel_id is provided.
-This is applicable for other notification APIs a;so
-
 **Usage:**
 
 ```gdscript
 
 # Call to the method for notification
-notification_plugin.showNotification(CHANNEL_ID, NOTIFICATION_ID, title, message)
+notification_plugin.showNotification(channelId, notificationId, title, message)
     
 ```
-#### 2. Delayed Notification:
+Note: `channelId` is required for android devices with api level 26(Oreo) or higher and `channelId` can be blank for supporting lower api levels:
 
-Shows a notification after certain interval of time.
-The delay has to be in seconds (Integer)
+* For api Level 26(Oreo) or higher a DEFAULT channel will be created if `channelId` is blank.
+* For api level lower than 26(Oreo), the `channelId` is ignored even if `channelId` is provided.
+* This is applicable for other notification APIs also
+  
+#### b. Delayed Notification:
+
+Show a notification after certain amount of time.
 
 **Usage:**
 
 ```gdscript
+# delay (seconds): the time after which the notification will be sent
+
 # Call to the method for notification
-notification_plugin.showNotificationAfter(CHANNEL_ID, NOTIFICATION_ID, delay, title, message)
+notification_plugin.showNotificationAfter(channelId, notificationId, title, message, delay)
     
 ```
 
-#### 3. Repeating Notification:
+#### c. Repeating Notification:
 
-Shows notifications at repeating interval of time.
-There are two parts to it, when to start(delay) and interval for repeat(interval)
+Show notification at repeating interval of time.
 
 **Usage:**
 
 ```gdscript
-# Call to the method for setting up notification
+# Call to the method for setting up notification at regular intervals
 
-# delay = time in seconds after which repeatition start
-# interval = time in seconds after which the notification will repeat
-# e.g., If a 24 hrs repeating notification at 1300 HRS is required and current time is 1100 HRS
+# delay (seconds): time after which repetition will start or when the first notification will be posted
+# interval (seconds) after which the notification will repeat
+# Example:
+# If you require a notification to happen at 1300 HRS every day(24hrs). Current time being 1100 HRS 
 # then delay = 2 * 3600 and interval = 24 * 3600 
   
-notification_plugin.setup_repeating_notification(CHANNEL_ID, NOTIFICATION_ID, delay, inetrval, title, message)
+notification_plugin.setupRepeatingNotification(channelId, notificationId, title, message, delay, interval)
   
 ```
-#### 4. Channel Management:
+### 2. Cancelling Notification:
 
-Ability to create channels for communication and also add customizations to it.
-***Channels are available from android API LEVEL 26 (O) and higher***. If the apis are used for devices below API LEVEL 26 then nothing will happen. It is safe to call, irrespective of API Level of android devices.  
+Cancel notification that are pending or active.
+**Usage:**
 
-These methods should be called during start of the application rather when sending the notification.
+```gdscript
+# To cancel the pending notifications
+notification_plugin.cancelNotification(notificationId)
+
+# To Cancel notifications that has not been cancelled by user yet (active).
+notification_plugin.cancelActiveNotifications(notificationId)
+```
+
+
+### 3. Channel Management:
+
+Manage channels for notifications.
 
 **Usage:**
 
 ```gdscript
-# To create a channel
+# To create/update a channel
 notification_plugin.setupNotificationChannel(channel_id, channel_name, importance, channel_description)
 
-# To customise a channel
-notification_plugin.setChannelCustomOptions(channel_id, show_when, small_icon_id, large_icon_id, notification_color_id)
+# To delete a channel
+notification_plugin.removeNotificationChannel(channel_id)
 ```
+Note: ***Channels are available from android API LEVEL 26 (O) and higher***. If the apis are used for devices below API LEVEL 26 then nothing will happen. It is safe to call, irrespective of API Level of android devices.  
 
-### Customization Notes:
+This method should be called during start of the application rather when when posting the notification.
 
-You can customise the following:
-1. **show_when:** Boolean (default: false) - controls to show when the notification arrived or not.
-2. **small_icon_id:** String (default: "notification_small_ic" | "icon") - controls the display of the small notification icon.
-   * It is must required for notification to work. 
-   * The icon should be provided as image under the location **"/android/build/res/drawable"**
-   * The icon should be white with transparent background as per guidelines from android or else it will display as a solid circle or square.
-   * It will colored based on the color_id customization
-3. **large_icon_id:** String (default: "notification_large_ic") - controls the display of the large notification icon
-   * The icon should be provided as image under the location **"/android/build/res/drawable"**
-4. **color_id:** String(default: "notification_color") - Controls the color of the small notification icon.  
-   * It is the id of the color mentioned in the xml file, and not the Hex code of the color.
-   * The color should be mentioned in any xml file stored in the **"/android/build/res/values"**
+### 4. Customize Notification:
 
-### APIs
+Customize the notification to match the game or stand unique.
 
-**Methods**
-- **getDefaultChannelId()**
-  Gets the id of the default channel
-  
-  **Parameters**
-  - None
-  
-  **Returns:**
-  - **[String]** Id of the default channel
+```gdscript
 
-- **setupNotificationChannel(channelId, channelName, importance, channelDescription)** 
-  Creates a notification channel. For devices with android api version 26 and higher a channel will be created.
-  
+var option = {"small_icon_id": "my_custom_icon", "color_id": "violet_red", "expandable": 1, "show_when": true }
+
+# To create/update a channel
+notification_plugin.setNotificationCustomOptions(notificationId, option)
+
+```
+Notes: 
+* All the images should be part of the **`/android/build/res/`** directory so that it can be identified by the android app. It can be one file under `drawable` or multiple distributed across `drawable-**dpi` directories.
+* small_icon should be white with transparent background as per guidelines from android or else it will display as a solid circle or square.
+* color_id should be mentioned in an xml file under **`/android/build/res/values`**
+* all ot the attributes inside options are optional.If not provided, then default values will be picked up. Check [NotificationOption](#notificationoption) for more details.
+
+
+## APIs
+
+### Objects
+
+##### NotificationOption
+Holds the options for configuring, how the notification displayed.
+
+- **show_when [Boolean]** (Default: false)
+  Controls to show when the notification generated or not.
+- **small_icon_id** [String] (Default: "notification_small_ic")
+  Holds the name of the image file to display the small notification icon
+- **color_id**[String] (Default: "notification_color")
+  Holds the id of the color in the resources inside android build directory
+- **large_icon_id** [String] (Default: "notification_large_ic")
+  Holds he name of the image file to display the large notification icon
+- **category** [String] (Default: [NotificationCompat.CATEGORY_STATUS](https://developer.android.com/reference/androidx/core/app/NotificationCompat#CATEGORY_STATUS()))
+- Holds the category for the notification. The value should be one of the CATEGORY_* values from [NotificationCompat](https://developer.android.com/reference/androidx/core/app/NotificationCompat)
+- **sub_text** [string] (Default: "")
+  Holds the addition text displayed between app name and When
+- **expandable** [int] (Default: 0)
+  Holds the value to customize the display of notification Possible values, NO_CUSTOMIZATION(0), BIG_TEXT(1), BIG_PICTURE(2) 
+
+##### NotificationInfo
+Holds the notification info of a notification
+- **id [Int]**
+  The notification id of the notification.
+- **tag [String]**
+  The notification tag of the notification.
+- **package [String]**
+  The name of the package from which the notification is.
+- **post_time [Int]**
+  The time at which the the notification was posted(Unix Time)
+- **channel_id [String]**
+  The id of the channel on which the notification was posted.
+
+
+
+### Methods
+
+- ##### setupNotificationChannel(channelId, channelName, importance, channelDescription)
+  Creates or updates a notification channel. For devices with android api version 26 and higher a channel will be created, or it will be ignored. If the channel already exists, then it will overwrite the channel.
+    
   **Parameters**
   - **channelId [String]** Unique Id of the channel
   - **channelName [String]** Display name of the channel
-  - **importance [Int]** the importance of the messages through this channel. See [NotificationManager].IMPORTANCE_* for possible values
+  - **importance [Int]** the importance of the messages through this channel. See [NotificationManager.IMPORTANCE_* for possible values
   - **channelDescription [String]** a descriptive text about the channel
   
-  **Returns:**
-  - **[Int]** NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1) or CHANNEL_ALREADY_EXISTS(1)
+- ##### removeNotificationChannel(channel_id)
+  Removes the channel from the system for the app.
 
-- **setChannelCustomOptions(channelId, showWhen, smallIconId, largeIconId, colorId)**
-  Setup the channel customization to customize icons and notification color. Any customization not provided (i.e blank) will take up default values.
-  
   **Parameters**
-  - **channelId [String]** the channel id on which the customization is applied
-  - **showWhen [Boolean]** will display showWhen or not
-  - **smallIconId [String]** displays the small notification icon for the channel
-  - **largeIconId [String]** displays the large icon for the channel
-  - **colorId [String]** colorid of the color of the small notification Icon
+  - **channelId [String]** Unique Id of the channel to be removed
   
-  **Returns:**
-  - **[Int]** NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1) or NO_CHANNEL_AVAILABLE(2)
 
-
-- **showNotification(channelId, notificationId, title, message)**
+- ##### setNotificationCustomOptions(notificationId, option)
+  Sets the custom options for the given `notificationId`. This should be called before posting notifications. 
+  Any customization values not provided, will take up default values. If  a custom option already exists for the given `notificationId`, then it will replace the option.
+    
+  **Parameters**
+  - **notificationId [Int]** the unique id of the notification
+  - **option [[NotificationOption](#notificationoption)]** the custom option to be set for the notification Id.
+  
+- ##### canPostNotifications(channelId)
+  Checks if the user has blocked the notifications for app and/or channel. From `ANDROID.O(26)` version or higher, user has abilities to block the notifications outside of app, in the settings.
+  **Returns**
+  - **[Boolean]** true if blocked by user.
+  
+- ##### showNotification(channelId, notificationId, title, message)
   Shows a Notification immediately
+  Note: if channel is not found then notification is sent through default channel
 
   **Parameters**
   - **channelId [String]** the id of the channel the notification has to be sent
@@ -149,50 +201,60 @@ You can customise the following:
   - **title [String]** the title of the notification
   - **message [String]** the message of the notification
   
-  **Returns:**
-  - None
   
-- **showNotificationAfter(channelId, notificationId, delay, title, message)** 
-  Shows a notification after a certain time, only once. 
+- ##### showNotificationAfter(channelId, notificationId, title, message, delay)
+  Shows a notification after a certain time delay, but only once.
   
   **Parameters**
   - **channelId [String]** the id of the channel the notification has to be sent
   - **notificationId [Int]** the unique id of the notification (can be used to cancel also)
+  
+  - **title [String]** the title of the notification
+  - **message [String]** the message of the notification
   - **delay [Int]** the amount of time(in seconds) after which the notification will be sent. It is an approximate value depending upon the device state.
-  - **title [String]** the title of the notification
-  - **message [String]** the message of the notification
-  
-  **Returns:**
-  - None
   
 
-- **setupRepeatingNotification(channelId, notificationId, delay, interval, title, message)**
-  Sets up a repeating notification schedule
+- ##### setupRepeatingNotification(channelId, notificationId, title, message, delay, interval)
+  Sets up a notification schedule, which will make the app post notification at regular interval of time. 
 
   **Parameters**
   - **channelId [String]** the id of the channel the notification has to be sent
   - **notificationId [Int]** the unique id of the notification (can be used to cancel also)
-  - **delay [Int]** the amount of time(in Seconds) after which the Notification repetition will start.
-  - **interval [Int]** the duration after which the notification will happen again. It is an approximate value depending upon the device state
   - **title [String]** the title of the notification
   - **message [String]** the message of the notification
+  - **delay [Int]** the amount of time(in Seconds) after which the first notification will be sent. It is an approximate value depending upon the device state
+  - **interval [Int]** the duration of time after which the notification will be sent again. It is an approximate value depending upon the device state
   
-  **Returns:**
-  - None
   
-- **cancelNotification(notificationId)**
+- ##### cancelNotification(notificationId)
   Cancels any pending notification. It may be one time or it may be repeating.
+
   **Parameters**
   - **notificationId [Int]** the id of the notification to be cancelled
 
 
-**Signals**
-  - None
+- ##### cancelActiveNotifications(notificationId)
+  Cancels any active notifications that has not been cancelled by user.
 
-### Developer Notes:
+  **Parameters**
+  - **notificationId [Int]** the id of the notification to be cancelled
 
-    - Android SDK:  Minimum - 23, Target - 32
-    - Java/JDK: 11 
-    - Kotlin: 1.6.21 (Minimum)
+- ##### getActiveNotifications()
+  Gets all the active notifications that has not been cancelled by the user.
 
+  **Returns**
+  - **{notifications: [[NotificationInfo](#notificationinfo)]**} summary details of all the active notifications
+
+### Signals
+   - None
+
+## Developer Notes:
+
+|             | Minimum | Maximum |
+|-------------|---------|---------|
+| Android SDK | 23      | 32      |
+| Java/JDK    | 11      |         |
+| Kotlin      | 1.6.21  |         | 
+
+    
   

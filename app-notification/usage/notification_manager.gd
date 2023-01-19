@@ -1,111 +1,93 @@
-# Notification Manager is a singleton to be added as part of autoload
 extends Node
 
-# enum to hold the Importance values corresponding to NotificationManager.IMPORTANCE_* 
-# in android api
-enum {IMPORTANCE_DEFAULT = 3, IMPORTANCE_HIGH = 4, IMPORTANCE_LOW = 2 }
+# Notification IDs
+enum { NOTIFY_IMMEDIATE = 100, NOTIFY_DELAYED = 101, NOTIFY_SCHEDULED= 102}
 
+# Notification Importance
+enum IMPORTANCE { NONE= 0, MIN = 1, LOW = 2, DEFAULT = 3, HIGH =4,  MAX=5  }
 
-# ids of the channel
-const DEFAULT_CHANNEL = ""
-const AFTER_CHANNEL ="after_channel"
-const REPEAT_CHANNEL = "repeat_channel"
+# Channel IDs
+const DEFAULT_CHANNEL_ID := "" 
+const AFTER_CHANNEL_ID := "after_channel"
+const SCHEDULED_CHANNEL_ID := "scheduled_channel"
 
-# Holds the name, importance and 
-const CHANNELS = {
-	AFTER_CHANNEL: ["After Channel", IMPORTANCE_HIGH,"Channel for Important Communications"],
-	REPEAT_CHANNEL: ["Repeat Channel", IMPORTANCE_DEFAULT,"Channel for Reminders"]
+# Notification Categories
+const NOTIFICATION_CATEGORY_STATUS := "status"
+const NOTIFICATION_CATEGORY_EVENT := "event"
+
+# Channels 
+const CUSTOM_CHANNELS := {
+	AFTER_CHANNEL_ID: {"name": "After Channel", "importance":IMPORTANCE.HIGH, "description": "After channel description" },
+	SCHEDULED_CHANNEL_ID: {"name": "Scheduled Channel", "importance":IMPORTANCE.HIGH, "description": "Recurring notifications comes through here" }
 }
 
-# Holds the notification ids forcorresponding channels, 
-# It can be different for each notification 
-const notificationIds = {
-	DEFAULT_CHANNEL: 1,
-	AFTER_CHANNEL: 2,
-	REPEAT_CHANNEL: 3
+# Notification Customizations
+const NOTIFICATION_CUSTOMIZATIONS := {
+	NOTIFY_IMMEDIATE: {"large_icon_id":"custom_large_icon", "sub_text": "Urgent", "expandable": 1},
+	NOTIFY_DELAYED: {"small_icon_id": "custom_icon", "color_id": "green", "expandable": 2, "large_icon_id":"demo_picture2", "sub_text": "Urgent", "category": NOTIFICATION_CATEGORY_EVENT }
 }
-const REPEAT_CHANNEL_CUSTOMIZATION = [true, "", "my_large_icon", "my_color"]
 
 var notifier
 
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	
-	# Check if the Plugin is available
+func _ready():	
+	# Check if the plugin is available
 	if Engine.has_singleton("AppNotification"):
 
 		# Get a reference to the singleton
 		notifier = Engine.get_singleton("AppNotification")
-
-		# call to setup the channels if not created.
+		
+		# setup the channels
 		setup_channels()
 		
+		# setup the customization
+		setup_customisation()
+		print("Notification Service is available.")
+	else:
+		print("Notification Service not available.")
 
-# Creates all the channels as required. 
-# Will work on androiid devices with api version 26 or higher
-# on android dveices lower than api version 26 it will be ignored, even if it is called
+# creates the channels
 func setup_channels():
-	if notifier != null:
-		# creating the channels
-		for channel_key in CHANNELS.keys():
-			notifier.setupNotificationChannel (
-				channel_key, 
-				CHANNELS[channel_key][0], 
-				CHANNELS[channel_key][1], 
-				CHANNELS[channel_key][2] 
-			)
-		# channel customisations
-		notifier.setChannelCustomOptions(
-			REPEAT_CHANNEL,
-			REPEAT_CHANNEL_CUSTOMIZATION[0],
-			REPEAT_CHANNEL_CUSTOMIZATION[1],
-			REPEAT_CHANNEL_CUSTOMIZATION[2],
-			REPEAT_CHANNEL_CUSTOMIZATION[3]
+	for id in CUSTOM_CHANNELS:
+		notifier.setupNotificationChannel(
+			id,
+			CUSTOM_CHANNELS[id].name,
+			CUSTOM_CHANNELS[id].importance,
+			CUSTOM_CHANNELS[id].description
 		)
 
+# initialises the customisation
+func setup_customisation():
+	for id in NOTIFICATION_CUSTOMIZATIONS:
+		notifier.setNotificationCustomOptions(id,NOTIFICATION_CUSTOMIZATIONS[id])
 
-# Shows an immediate notification when no channel has been provided
-func show_notification(title, message):
-	print("GODOT: Notification {%s, %s}" % [title, message])
-	if notifier != null:
-		notifier.showNotification(DEFAULT_CHANNEL, notificationIds[DEFAULT_CHANNEL], title, message)
+# Send an immediate notification of particular notification type
+func send_notification(type: int, title: String, message: String):
+	if notifier:
+		notifier.showNotification(DEFAULT_CHANNEL_ID, type, title, message)
 
 
-# Shows a notification after a delay on a custom channel but with default customizations
-func show_notification_after(title, message, delay):
-	print("GODOT: Notification {%s, %s} after 10 secs" % [title, message])
-	if notifier != null:
-		notifier.showNotificationAfter(
-			AFTER_CHANNEL, 
-			notificationIds[AFTER_CHANNEL],
-			delay,
-			title, 
-			message)
+# send the Notification after a delay
+func send_notifications_after( title: String, message: String, delay: int):
+	if notifier:
+		if notifier.canPostNotifications(AFTER_CHANNEL_ID):
+			notifier.showNotificationAfter(AFTER_CHANNEL_ID, NOTIFY_DELAYED, title, message, delay)
+		else:
+			print("Notification is blocked by user")
 
-# shows notification after regular intervals with separate customizations
-# delay = time in seconds after which repeations start
-# interval = time in seconds after which the notification will repeat
-# e.g., If a 24 hrs repeating notification at 1300 HRS is required and current time is 1100 HRS
-# then delay = 7200 and interval = 24 * 3600   
-func setup_repeating_notification(title, message, delay, interval):
-	if notifier != null:
-		notifier.setupRepeatingNotification(
-			REPEAT_CHANNEL,
-			notificationIds[REPEAT_CHANNEL],
-			delay,
-			interval,
-			title,
-			message
-		)
+# send the notification att regular intervals
+func send_notification_recurring(title: String, message: String, delay: int, interval: int):
+	if notifier:
+		notifier.setupRepeatingNotification(SCHEDULED_CHANNEL_ID, NOTIFY_SCHEDULED,title, message, delay, interval)
 
-# Cancels the after notifictaion if there is any pending
-func cancel_after_notification():
-	if notifier != null:
-		notifier.cancelNotification(notificationIds[AFTER_CHANNEL])
-		
 
-# cancels the Repeating notification, if there is any
+# Lists all the active notification
+func get_active_notifications():
+	if notifier:
+		return notifier.getActiveNotifications().notifications
+
+# cancels the pending repeating notification
 func cancel_repeating_notification():
-	if notifier != null:
-		notifier.cancelNotification(notificationIds[REPEAT_CHANNEL])
+	if notifier:
+		notifier.cancelNotification(NOTIFY_SCHEDULED)
+
+

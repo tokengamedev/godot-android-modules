@@ -8,12 +8,12 @@ import android.util.Log
 class NotificationReceiver: BroadcastReceiver() {
 
     companion object{
-        private const val TAG = "NotificationReceiver"
+        private const val TAG = "Notification"
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
 
-        Log.i(TAG, "Received notification:")
+        //Log.i(TAG, "Received notification:")
 
         // do not do anything if context or intent is null
         if (context == null || intent == null) return
@@ -24,14 +24,18 @@ class NotificationReceiver: BroadcastReceiver() {
         val title = intent.getStringExtra("title") ?: ""
         val channelId = intent.getStringExtra("channel_id") ?: ""
 
-        Log.i(TAG, "title=$title, message=$message, channel=$channelId")
+        //Log.i(TAG, "title=$title, message=$message, channel=$channelId")
 
         // Get the Custom Options details
         val options = NotificationOptions(
-            intent.getBooleanExtra("show_when", NotificationOptions.DEFAULT_SHOW_WHEN),
-            intent.getStringExtra("small_icon"),
-            intent.getStringExtra("large_icon"),
-            intent.getStringExtra("color")
+            intent.getBooleanExtra(NotificationOptions.TAG_SHOW_WHEN, NotificationOptions.DEFAULT_SHOW_WHEN),
+            intent.getStringExtra(NotificationOptions.TAG_SMALL_ICON),
+            intent.getStringExtra(NotificationOptions.TAG_LARGE_ICON),
+            intent.getStringExtra(NotificationOptions.TAG_COLOR),
+            intent.getIntExtra(NotificationOptions.TAG_EXPANDABLE, 0),
+            intent.getStringExtra(NotificationOptions.TAG_CATEGORY),
+            intent.getStringExtra(NotificationOptions.TAG_SUB_TEXT),
+
         )
 
         val notifyHelper = NotificationHelper(context)

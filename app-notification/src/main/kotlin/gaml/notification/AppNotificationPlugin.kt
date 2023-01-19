@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
+import org.godotengine.godot.Dictionary
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
@@ -22,23 +24,33 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
 
     private val notifyHelper: Lazy<NotificationHelper> = lazy { NotificationHelper(context) }
 
-    private val channelOptions = mutableMapOf(
-        NotificationHelper.DEFAULT_CHANNEL_ID to
-            NotificationOptions(null, null, null, null)
-    )
+
+    private val customOptions = mutableMapOf<Int, NotificationOptions>()
     /**
      * Gets the name of the plugin to be used in Godot.Required by Godot
      * @return name of the plugin
      */
     override fun getPluginName() = "AppNotification"
 
+    /**
+     * Registers all the signals which the game may need to listen to
+     * Empty as no signals
+     */
+    override fun getPluginSignals(): MutableSet<SignalInfo> {
+        return mutableSetOf()
+    }
 
     /**
-     * Returns the Id of the DefaultChannel
-     * @return Id of the default channel
+     * Checks if the notifications is not blocked by user for the app and channel
+     * @return true if not blocked else blocked
      */
     @UsedByGodot
-    fun getDefaultChannelId(): String = NotificationHelper.DEFAULT_CHANNEL_ID
+    fun canPostNotifications(channelId: String): Boolean{
+        val helper = notifyHelper.value
+        return helper.areNotificationsEnabled() &&
+                !helper.areNotificationsPaused() &&
+                !helper.isChannelBlocked(channelId)
+    }
 
     /**
      * Creates a notification channel. It will work with android api version 26 and higher.
@@ -54,9 +66,10 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
     fun setupNotificationChannel(channelId: String,
                                  channelName: String,
                                  importance: Int,
-                                 channelDescription: String): Int{
+                                 channelDescription: String){
 
-        return notifyHelper.value.createNotificationChannel(
+
+        notifyHelper.value.createNotificationChannel(
             channelId,
             channelName,
             importance,
@@ -65,44 +78,30 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
     }
 
     /**
-     * Setup the channel customization to customize icons and notification color.
-     * Any customization not provided will take up default values.
-     *
-     * @param channelId the channel id on which the customization is applied
-     * @param showWhen will display showWhen or not
-     * @param smallIconId displays the small notification icon for the channel
-     * @param largeIconId displays the large icon for the channel
-     * @param colorId colorizes the small notification Icon
-     *
-     * @return NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1) and NO_CHANNEL_AVAILABLE(2)
+     * Removes a notification channel. If the android version is lower than 26 or the channel does
+     * not exist nothing will happen
+     * @param channelId Id of the channel to be deleted
      */
     @UsedByGodot
-    fun setChannelCustomOptions(channelId: String,
-                                showWhen: Boolean ,
-                                smallIconId:String,
-                                largeIconId: String,
-                                colorId: String ): Int{
+    fun removeNotificationChannel(channelId: String){
+        notifyHelper.value.removeNotificationChannel(channelId)
+    }
 
-        // Check if it is valid OS to work on
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            return NotificationHelper.INCOMPATIBLE_OS_VERSION
-
-        // Check if the channel is
-        return if (notifyHelper.value.getNotificationChannel(channelId) == null) {
-            NotificationHelper.NO_CHANNEL_AVAILABLE
-        }
-        else {
-            // Copy the default options and override whatever is provided
-            channelOptions[channelId] =
-                NotificationOptions(showWhen, smallIconId, largeIconId, colorId)
-
-            NotificationHelper.NO_ERROR
-        }
+    /**
+     * Setup the Notification customization to customize icons, color and more
+     * Any customization not provided will take up default values.
+     * @param notificationId the notification id on which the customization is applied
+     * @param options the dictionary of various options for customisation
+     *
+     */
+    @UsedByGodot
+    fun setNotificationCustomOptions( notificationId: Int,
+                                      options: Dictionary){
+        customOptions[notificationId] = NotificationOptions(options)
     }
 
     /**
      * Shows a Notification immediately
-     *
      * @param channelId the id of the channel the notification has to be sent
      * @param notificationId the unique id of the notification (can be used to cancel also)
      * @param title the title of the notification
@@ -111,7 +110,7 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
     @UsedByGodot
     fun showNotification(channelId: String, notificationId: Int, title: String, message: String) {
 
-        val notifyOption = getNotificationOptions(channelId)
+        val notifyOption = getNotificationOptions(notificationId)
 
         notifyHelper.value.notify(channelId, notificationId, title, message, notifyOption )
 
@@ -122,22 +121,27 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
      *
      * @param channelId the id of the channel the notification has to be sent
      * @param notificationId the unique id of the notification (can be used to cancel also)
-     * @param interval the amount of time(in Seconds) after which the Notification will be sent.
-     * It is an approximate value depending upon the device state
      * @param title the title of the notification
      * @param message the message of the notification
+     * @param delay the amount of time(in Seconds) after which the Notification will be sent.
+     * It is an approximate value depending upon the device state
      */
     @UsedByGodot
-    fun showNotificationAfter(channelId: String, notificationId: Int, interval: Int, title: String, message: String) {
+    fun showNotificationAfter(channelId: String,
+                              notificationId: Int,
+                              title: String,
+                              message: String,
+                              delay: Int) {
 
         // Interval has to be greater than 0
-        if (interval <= 0) return
+        if (delay <= 0)
+            showNotification(channelId, notificationId, title, message)
 
         val pendingIntent = getAlarmPendingIntent(channelId, notificationId, title, message)
 
         val calendar: Calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
-        calendar.add(Calendar.SECOND, interval)
+        calendar.add(Calendar.SECOND, delay)
 
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
@@ -149,35 +153,60 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
      *
      * @param channelId the id of the channel the notification has to be sent
      * @param notificationId the unique id of the notification (can be used to cancel also)
-     * @param interval the amount of time(in Seconds) after which the Notification repetition
-     * will start.
-     * @param repeat_duration the duration after which the notification will happen again.
-     * It is an approximate value depending upon the device state
      * @param title the title of the notification
      * @param message the message of the notification
+     * @param delay the amount of time(in Seconds) after which the first notification will be posted
+     * @param interval the duration of time (in Seconds) after which the notification will be posted
+     * again. It is an approximate value depending upon the device state
+
      */
     @UsedByGodot
     fun setupRepeatingNotification(channelId: String,
                                    notificationId: Int,
-                                   interval: Int,
-                                   repeat_duration: Int,
                                    title: String,
-                                   message: String) {
+                                   message: String,
+                                   delay: Int,
+                                   interval: Int) {
 
-        // Interval has to be greater than 0
-        if (repeat_duration <= 0) return
+        // Interval and Delay has to be greater than 0
+        if (interval <= 0 || delay <= 0) return
 
         val pendingIntent = getAlarmPendingIntent(channelId, notificationId, title, message)
 
         val calendar: Calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
-        calendar.add(Calendar.SECOND, interval)
+        calendar.add(Calendar.SECOND, delay)
 
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         am.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis,
-            (repeat_duration * 1000).toLong(), pendingIntent)
+            (interval * 1000).toLong(), pendingIntent)
     }
+
+    /**
+     * Fetches all the active notifications that is not currently cancelled by user
+     * @return Dictionary containing Array of trimmed Status Bar Notification Info
+     */
+    @UsedByGodot
+    fun getActiveNotifications(): Dictionary {
+        val activeNotifications = Dictionary()
+
+        activeNotifications["notifications"] =
+            notifyHelper.value.getAllActiveNotifications().toTypedArray<Any>()
+
+        return activeNotifications
+    }
+
+    /**
+     * Cancels the active notification for the notification Id and tag
+     * @param notificationId The id of the notification being cleared
+     * @param tag the tag attached to the notification, to filter further.
+     * It can be empty for cancelling all notifications for notificationId
+     */
+    @UsedByGodot
+    fun cancelActiveNotification(notificationId: Int, tag: String = "") =
+        notifyHelper.value.cancelActiveNotification(notificationId, tag)
+
 
     /**
      * Cancels any pending notification. It may be one time or it may be repeating.
@@ -188,14 +217,6 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val sender: PendingIntent = getAlarmPendingIntent("", notificationId, "", "")
         am.cancel(sender)
-    }
-
-    /**
-     * Registers all the signals which the game may need to listen to
-     * Empty as no signals
-     */
-    override fun getPluginSignals(): MutableSet<SignalInfo> {
-        return mutableSetOf()
     }
 
     /**
@@ -212,37 +233,39 @@ class AppNotificationPlugin(godot: Godot): GodotPlugin(godot) {
                                       title: String,
                                       message: String): PendingIntent {
 
-        val notificationOption = getNotificationOptions(channelId)
+        val notificationOption = getNotificationOptions(notificationId)
 
         val i = Intent(context, NotificationReceiver::class.java)
         i.putExtra("notification_id", notificationId)
         i.putExtra("message", message)
         i.putExtra("title", title)
         i.putExtra("channel_id", channelId)
-        i.putExtra("show_when", notificationOption.showWhen)
-        i.putExtra("small_icon", notificationOption.smallIconId)
-        i.putExtra("large_icon", notificationOption.largeIconId)
-        i.putExtra("color", notificationOption.colorId)
+        i.putExtra(NotificationOptions.TAG_SHOW_WHEN, notificationOption.showWhen)
+        i.putExtra(NotificationOptions.TAG_SMALL_ICON, notificationOption.smallIconId)
+        i.putExtra(NotificationOptions.TAG_LARGE_ICON, notificationOption.largeIconId)
+        i.putExtra(NotificationOptions.TAG_COLOR, notificationOption.colorId)
+        i.putExtra(NotificationOptions.TAG_EXPANDABLE, notificationOption.expandable)
+        i.putExtra(NotificationOptions.TAG_CATEGORY, notificationOption.category)
+        i.putExtra(NotificationOptions.TAG_SUB_TEXT, notificationOption.subText)
 
 
         return PendingIntent.getBroadcast(activity, notificationId, i,
             notifyHelper.value.flagPendingIntent(false))
     }
 
-
     /**
      * Gets the channel notification options from the list.
      * If no notification options found for the channel then Default notification channel
      * options will be used
-     * @param channelId the channel id for which options is required
+     * @param notificationId the channel id for which options is required
      *
      * @return Notification options for sending the notification
      */
-    private fun getNotificationOptions(channelId: String): NotificationOptions{
-        return if (channelId.isNotEmpty() && channelOptions.containsKey(channelId))
-            channelOptions.getValue(channelId)
+    private fun getNotificationOptions(notificationId: Int): NotificationOptions{
+        return if (customOptions.isNotEmpty() && customOptions.containsKey(notificationId))
+            customOptions.getValue(notificationId)
         else
-            channelOptions.getValue(NotificationHelper.DEFAULT_CHANNEL_ID)
+            NotificationHelper.DEFAULT_NOTIFICATION_OPTIONS
     }
 
 }

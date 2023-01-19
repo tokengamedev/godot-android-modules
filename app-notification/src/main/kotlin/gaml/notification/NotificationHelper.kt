@@ -6,12 +6,13 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import org.godotengine.godot.Dictionary
 
 /**
  * Helper class to send notification
@@ -19,20 +20,50 @@ import androidx.core.app.NotificationCompat
 class NotificationHelper (private val context: Context){
 
     companion object{
-        const val DEFAULT_CHANNEL_ID = "default"
+        private const val DEFAULT_CHANNEL_ID = "default"
         private const val DEFAULT_CHANNEL_NAME = "Default"
         private const val DEFAULT_NOTIFICATION_ICON_COLOR = Color.MAGENTA
 
         // Channel creation Error
-        const val NO_ERROR = 0
-        const val INCOMPATIBLE_OS_VERSION = -1
-        const val CHANNEL_ALREADY_EXISTS = 1
-        const val NO_CHANNEL_AVAILABLE = 2
+        val DEFAULT_NOTIFICATION_OPTIONS = NotificationOptions()
     }
 
     private val notificationManager: NotificationManager =
         (context.getSystemService(Context.NOTIFICATION_SERVICE) ?: throw IllegalStateException()) as NotificationManager
 
+    /**
+     * Checks if the App Notification is blocked by User
+     * @return true if enabled else blocked by user
+     */
+    fun areNotificationsEnabled(): Boolean
+    {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            notificationManager.areNotificationsEnabled()
+        } else true
+    }
+
+    /**
+     * Checks if the App Notification is blocked by User
+     * @return true if enabled else blocked by user
+     */
+    fun areNotificationsPaused(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            notificationManager.areNotificationsPaused()
+        }else false
+    }
+
+    /**
+     * Checks if the Channel is Blocked is blocked by User
+     * @param channelId unique id of the channel
+     * @return true if it is blocked else enabled fro notification
+     */
+    fun isChannelBlocked(channelId: String): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = getNotificationChannel(getNotificationChannelId(channelId))
+            return channel != null && channel.importance == NotificationManager.IMPORTANCE_NONE
+        }
+        else false
+    }
 
     /**
      * Creates a Notification channel (if not existing with the same id). This can be called
@@ -42,18 +73,23 @@ class NotificationHelper (private val context: Context){
      * @param importance the importance of the messages through this channel.
      * See [NotificationManager].IMPORTANCE_* for possible values
      * @param channelDescription a descriptive text about the channel
-     * @return [Int] NO_ERROR(0), INCOMPATIBLE_OS_VERSION(-1), CHANNEL_ALREADY_EXISTS(1)
      */
     fun createNotificationChannel(channelId: String,
                                   channelName: String,
                                   importance: Int,
-                                  channelDescription: String): Int{
+                                  channelDescription: String) {
 
         // Cannot do any channel creation below android api version 26
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            return INCOMPATIBLE_OS_VERSION
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = notificationManager.getNotificationChannel(channelId)
+            if (channel != null) {
+                if (channel.name != channelName ||
+                    channel.importance != importance ||
+                    channel.description != channelDescription) {
 
-        if(notificationManager.getNotificationChannel(channelName) == null) {
+                    notificationManager.deleteNotificationChannel(channelId)
+                }else return
+            }
             notificationManager.createNotificationChannel(
                 NotificationChannel(
                     channelId,
@@ -61,37 +97,59 @@ class NotificationHelper (private val context: Context){
                     importance
                 ).apply { description = channelDescription }
             )
-            return NO_ERROR
-        }
-        else {
-            return CHANNEL_ALREADY_EXISTS
+
         }
     }
 
     /**
-     * Gets a channel registered in the OS for Notification
-     * @return [NotificationChannel] if the channel is registered with the name else null
+     * Removes the notification channel if exists. It will not delete default channel
      */
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun getNotificationChannel(channelId: String) :NotificationChannel?{
-        return notificationManager.getNotificationChannel(channelId)
+    fun removeNotificationChannel(channelId: String){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannelId = getNotificationChannelId(channelId)
+            if (notificationChannelId != DEFAULT_CHANNEL_ID){
+                notificationManager.deleteNotificationChannel(notificationChannelId)
+            }
+        }
     }
 
     /**
-     * Gets a default channel. Recommended to create a channel and use it.
-     * Default channel is for safeguard purpose only.
+     * Returns a list of active status bar notifications
+     * @return array of trimmed notification objects
      */
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun getDefaultChannel() :NotificationChannel?{
-        createNotificationChannel(
-            DEFAULT_CHANNEL_ID,
-            DEFAULT_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_HIGH,
-            "Default channel"
-        )
-        return getNotificationChannel(DEFAULT_CHANNEL_ID)
+    fun getAllActiveNotifications(): MutableList<Dictionary> {
+        val allNotifications = mutableListOf<Dictionary>()
+        for (notification in notificationManager.activeNotifications){
+            val notificationDict = Dictionary()
+            notificationDict["id"] = notification.id
+            notificationDict["tag"] = notification.tag
+            notificationDict["package_name"] = notification.packageName
+            notificationDict["post_time"] = notification.postTime
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                notificationDict["channel_id"] = notification.notification.channelId
+            }
+            else{
+                notificationDict["channel_id"] = ""
+            }
+
+            allNotifications.add(notificationDict)
+        }
+
+        return allNotifications
     }
 
+    /**
+     * Cancels any active notification, if tag is provided then tag is used also to filter
+     */
+    fun cancelActiveNotification(notificationId: Int, tag: String = ""){
+
+        if (tag.isNotEmpty()){
+            notificationManager.cancel(tag, notificationId)
+        }
+        else{
+            notificationManager.cancel(notificationId)
+        }
+    }
 
     /**
      * Builds the Notification and sends a notification in the given channel
@@ -106,7 +164,7 @@ class NotificationHelper (private val context: Context){
                message: String,
                notifyOptions: NotificationOptions = NotificationOptions()){
 
-        val notificationChannelId = getNotificationChannelId(channelId)
+        val notificationChannelId: String = getNotificationChannelId(channelId)
         // Create the builder
         val builder: NotificationCompat.Builder =
             NotificationCompat.Builder(context, notificationChannelId)
@@ -119,6 +177,10 @@ class NotificationHelper (private val context: Context){
         builder.setContentText(message)
         builder.setTicker(message)
 
+        if (notifyOptions.expandable == NotificationOptions.EXPANDABLE_TEXT){
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(message))
+        }
+        builder.setSubText(notifyOptions.subText)
         // Sets the default sounds and vibrations mode
         builder.setDefaults(Notification.DEFAULT_ALL)
         builder.setColorized(false)
@@ -157,7 +219,15 @@ class NotificationHelper (private val context: Context){
             if (largeIconID >= 0){
                 val largeIcon = BitmapFactory.decodeResource(context.resources, largeIconID)
                 builder.setLargeIcon(largeIcon)
+                if(notifyOptions.expandable == NotificationOptions.EXPANDABLE_IMAGE){
+                    builder.setStyle(NotificationCompat.BigPictureStyle()
+                        .bigPicture(largeIcon)
+                        .bigLargeIcon(null)
+                        )
+                }
+
             }
+
         }
         // Showing time
         builder.setShowWhen(notifyOptions.showWhen)
@@ -169,7 +239,7 @@ class NotificationHelper (private val context: Context){
         // What happens when you click the notification
         builder.setContentIntent(getPendingIntentForAction())
         builder.setAutoCancel(true)
-        builder.setCategory(Notification.CATEGORY_EVENT)
+        builder.setCategory(notifyOptions.category)
 
         // Show the notification
         notificationManager.notify(notificationId, builder.build())
@@ -219,20 +289,40 @@ class NotificationHelper (private val context: Context){
             }
     }
 
+    /**
+     * Gets a default channel. Recommended to create a channel and use it.
+     * Default channel is for safeguard purpose only.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getDefaultChannelId() : String {
+        val channel = getNotificationChannel(DEFAULT_CHANNEL_ID)
+        if (channel == null) {
+            createNotificationChannel(
+                DEFAULT_CHANNEL_ID,
+                DEFAULT_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT,
+                "Default channel"
+            )
+        }
+        return  DEFAULT_CHANNEL_ID
+    }
+
+    /**
+     * gets a notification channel based on id and other factors
+     * @return NotificationChannel if able to find else null
+     */
+    private fun getNotificationChannel(channelId: String): NotificationChannel?{
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            notificationManager.getNotificationChannel(channelId)
+        }else{
+            null
+        }
+    }
+
     private fun getNotificationChannelId(channelId: String): String{
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            // Get the channel
-            val channel:NotificationChannel? =
-                getNotificationChannel(channelId) ?:
-                getDefaultChannel()
-
-            if (channel != null)
-                channel.id
-            else
-                "Stub!"
+            return channelId.ifEmpty { getDefaultChannelId() }
         }
-        else {
-            "Stub!"
-        }
+        else ""
     }
 }
