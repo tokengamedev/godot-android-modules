@@ -247,10 +247,9 @@ class GooglePlayBillingPlugin(godot:Godot): GodotPlugin(godot),BillingClientStat
 
                 // add to the list for sending back
                 val dict = BillingUtils.getProductDetailsDictionary(productDetail)
-                for (entry in dict.entries){
-                    Log.i(TAG, "...${entry.key} = ${entry.value}")
-                }
-                Log.i(TAG,"")
+//                for (entry in dict.entries){
+//                    Log.i(TAG, "...${entry.key} = ${entry.value}")
+//                }
                 productList.add(dict)
             }
 

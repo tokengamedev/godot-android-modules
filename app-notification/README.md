@@ -250,11 +250,11 @@ Holds the notification info of a notification
 
 ## Developer Notes:
 
-|             | Minimum | Maximum |
-|-------------|---------|---------|
-| Android SDK | 23      | 32      |
-| Java/JDK    | 11      |         |
-| Kotlin      | 1.6.21  |         | 
+|             | Minimum  | Maximum |
+|-------------|----------|---------|
+| Android SDK | 23       | 32      |
+| Java/JDK    | 11       |         |
+| Kotlin      | 1.8.0    |         | 
 
     
   

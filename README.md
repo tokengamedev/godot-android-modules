@@ -38,20 +38,20 @@ To understand how to use plugins in Godot refer to [Godot docs](https://docs.god
 
 List of plugins or modules:
 
-| Plugin or Module | Description | Supported API Version |
-| ---------------- | ----------- | --------------------- |
-| [AppNotification](app-notification/README.md) | Plugin to send local notification in android devices | N.A |
-| [GooglePlayReview](google-play-review/README.md) | Plugin to include in-app review or review link component in your game | com.google.android.play:review:2.0.1 |
-| [GooglePlayBilling](google-play-billing/README.md) | Plugin to integrate google play billing in the game for managing a store | com.android.billingclient:billing:5.1.0 |
+| Plugin or Module                                              | Description                                                                       | Supported API Version                                |
+|---------------------------------------------------------------|-----------------------------------------------------------------------------------|------------------------------------------------------|
+| [AppNotification](app-notification/README.md)                 | Plugin to send local notification in android devices                              | N.A                                                  |
+| [GooglePlayReview](google-play-review/README.md)              | Plugin to include in-app review or review link component in your game             | com.google.android.play:review:2.0.1                 |
+| [GooglePlayBilling](google-play-billing/README.md)            | Plugin to integrate google play billing in the game for managing a store          | com.android.billingclient:billing:5.1.0              |
 | [GooglePlayGameServices](google-play-game-services/README.md) | Plugin to integrate google play game services like achievments, events and others | com.google.android.gms:play-services-games-v2:17.0.0 |
 
 
 ### External Plugins (Reference):
 Below are list of plugins which have not been added, as implementation by the user is well supported.
 
-| Plugin or Module | Description | Type |
-| ---------------- | ----------- | ---- |
-| [godot-sqlite](https://github.com/2shady4u/godot-sqlite) | Godot plugin for integrating SQLite DB into the game | Native |
+| Plugin or Module                                                     | Description                                                 | Type   |
+|----------------------------------------------------------------------|-------------------------------------------------------------|--------|
+| [godot-sqlite](https://github.com/2shady4u/godot-sqlite)             | Godot plugin for integrating SQLite DB into the game        | Native |
 | [GodotAdMob](https://github.com/Shin-NiL/Godot-Android-Admob-Plugin) | Godot plugin for integrating Admob Ad Network into the game | Plugin |
 
 ### Contributing and Support
@@ -61,13 +61,15 @@ If you are facing a problem in usage, raise an issue providing details about the
 
 ### Developer Notes
 
-      Godot Engine Version(Minimum) - 3.5 (stable)
-      Android SDK (Minimum) - 23 (Build.VERSION_CODES.O)
-      Android SDK (Target) - 32 (Build.VERSION_CODES.S_V2)
-      Java Version(jdk)(Minimum) - 11
-      Kotlin version(Minimum) - 1.6.21
-      Android Gradle Plugin Version - 7.2.2
-      Gradle Version - 7.5.1
+|                       | Minimum                    | Target/Compile                |
+|-----------------------|----------------------------|-------------------------------|
+| Godot Engine Version  | 3.5 (Stable)               |                               |
+| Android SDK           | 23 (Build.VERSION_CODES.O) | 32 (Build.VERSION_CODES.S_V2) |
+| Java Version(jdk)     | 11                         |                               |
+| Kotlin version        | 1.8.0                      |                               |
+| Android Gradle Plugin | 7.4.0                      |                               |
+| Gradle                | 7.6                        |                               |
+
 
 If anything else missed out, please send a note 
 

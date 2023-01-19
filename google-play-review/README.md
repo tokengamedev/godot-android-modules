@@ -67,40 +67,33 @@ if Engine.has_singleton("GooglePlayReview"):
 
 ### APIs
 
-**Methods**
+#### Methods
 
-- **launchInAppReview()**
-  Launches the in-app review flow
-  
-  **Parameters**
-  - None
-  
-  **Returns:**
-  - None
+- ##### launchInAppReview()
+  Launches the in-app review flow within the app.
 
- - **launchInStoreReview()**
-    Launches the google play app and opens the app for providing review.
-    
-    **Parameters**
-    - None
-    
-    **Returns:**
-    - None
   
+- ##### launchInStoreReview()
+   Launches the google play store app and opens the app for providing review.
+    
+ 
 
 **Signals**
-  - **flow_completed** 
+  - ##### flow_completed
     Raised when the review flow is completed. It is called only for InApp Review flow.
-  - **flow_launch_error**
-    Raised when the review flow launch failed. It is called only for InApp Review flow. This will not be raised if the review launch was successful but window did not show.
 
+  - ##### flow_launch_error
+    Raised when the review flow launch failed. It is called only for InApp Review flow. This will not be raised if the review launch was successful but window did not show.
 
 
 ### Developer Notes:
 
-    - Android SDK:  Minimum - 23, Target - 32
-    - Java/JDK: 11 
-    - Kotlin: 1.6.21 (Minimum)
-    - Libraries dependencies:
-      - com.google.android.play:review:2.0.1
+|             | Minimum  | Maximum |
+|-------------|----------|---------|
+| Android SDK | 23       | 32      |
+| Java/JDK    | 11       |         |
+| Kotlin      | 1.8.0    |         | 
+
+- Library Dependencies:
+    - com.google.android.play:review:2.0.1
   

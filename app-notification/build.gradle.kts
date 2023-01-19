@@ -23,11 +23,12 @@ extra.apply {
 }
 
 android {
+    namespace="gaml.notification"
     compileSdk = 32
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 32
+        //targetSdk = 32
     }
 
     buildTypes {
@@ -52,5 +53,5 @@ apply<GdapPlugin>()
 dependencies{
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation(kotlin("stdlib", "1.6.21"))
+//    implementation(kotlin("stdlib", "1.6.21"))
 }

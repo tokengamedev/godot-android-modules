@@ -28,7 +28,7 @@ The features supported areas follows:
 
 
 ### Additional Configuration:
-For the plugin to work follwing changes has to be done
+For the plugin to work following changes has to be done
 1. Setup the Game project and add proper credentials for the project. Follow the steps mentioned [here](https://developers.google.com/games/services/console/enabling)
 2. In your app's `AndroidManifest.xml` file, add the following `<meta-data>` element and attributes to the `<application>` element:
 
@@ -57,7 +57,7 @@ For the plugin to work follwing changes has to be done
 #### Objects:
 
 - ##### Player:
-  Reprsents the player as represented by the game service
+  Represents the player as represented by the game service
   - **player_id [String]** - Id of the player
   - **title [String]** - Title of the player
   - **display_name [String]** - Name as displayed for the player.
@@ -68,7 +68,7 @@ For the plugin to work follwing changes has to be done
   Checks if the user signed in into the game services or not.
 
   **Returns:**
-  - **[Boolean]** true if signedin else false
+  - **[Boolean]** true if signed in else false
 
 
 - ##### signIn()
@@ -84,11 +84,11 @@ For the plugin to work follwing changes has to be done
 #### Signals
 
 - ##### sign_in_success()
-  Raised when the signin is successful. If the game is integrated successfully, then this signal will be raised automatically on the launch of the game.
+  Raised when the signed in is successful. If the game is integrated successfully, then this signal will be raised automatically on the launch of the game.
 
 
 - ##### sign_in_failed()
-  Raised when the signin is not successful. If the game is integrated successfully, then this signal will be raised automatically on the launch of the game.
+  Raised when the signed in is not successful. If the game is integrated successfully, then this signal will be raised automatically on the launch of the game.
 
 - ##### player_info_fetched (player_info)
   Raised when the player info is fetched from the services.
@@ -96,7 +96,16 @@ For the plugin to work follwing changes has to be done
   **Parameters**
   - **player_info [Player]** The player data if the fetch has been successful else empty dictionary
 
+### Developer Notes:
 
+|             | Minimum  | Maximum |
+|-------------|----------|---------|
+| Android SDK | 23       | 32      |
+| Java/JDK    | 11       |         |
+| Kotlin      | 1.8.0    |         | 
+
+- Library Dependencies:
+  - com.google.android.gms:play-services-games-v2:17.0.0
 
 
 

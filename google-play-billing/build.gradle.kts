@@ -7,7 +7,7 @@ apply {
 }
 // Version of the Module. It will be used for creating file
 // file name = "{project.name}.{project.version}.{build_type/variant}.aar"
-version = "1.0.0"
+version = "1.0.1"
 
 // all the build outputs under one location
 setBuildDir("${rootProject.buildDir}/${project.name}")
@@ -17,15 +17,16 @@ extra.apply {
     set("moduleName", "GooglePlayBilling")
     set("binary_type", "local")
     set("remoteDependencies", "\"com.android.billingclient:billing:5.1.0\"")
-
 }
 
 android {
+    namespace="gaml.google.play.billing"
     compileSdk = 32
+
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 32
+        //targetSdk = 32
     }
 
     buildTypes {
@@ -48,7 +49,7 @@ apply<GdapPlugin>()
 dependencies {
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.appcompat:appcompat:1.6.0")
     implementation("com.android.billingclient:billing:5.1.0")
     implementation("com.android.billingclient:billing-ktx:5.1.0")
 }

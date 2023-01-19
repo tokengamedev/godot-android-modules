@@ -98,7 +98,7 @@ Note: For Subscription products various features are not fully supported yet
   - **products [Array(String)]** - list of product_ids purchased
 
 - ##### CustomError:
-  Represnts a custom error with custom error codes when purchase flow is launched
+  Represents a custom error with custom error codes when purchase flow is launched
   - **error_code [String]** - custom error code. possible values are PRODUCT_ID_NOT_IN_CACHE(1), SERVICE_ERROR(2) or NO_ERROR(0)
   - **int_error [Result]** - Internal launch result from billing client if there is any.
 
@@ -241,10 +241,13 @@ Note: For Subscription products various features are not fully supported yet
 
 ### Developer Notes:
 
-    - Android SDK:  Minimum - 23, Target - 32
-    - Java/JDK: 11 
-    - Kotlin: 1.6.21 (Minimum)
-    - Library Dependencies:
-      - com.android.billingclient:billing:5.1.0
+|             | Minimum  | Maximum |
+|-------------|----------|---------|
+| Android SDK | 23       | 32      |
+| Java/JDK    | 11       |         |
+| Kotlin      | 1.8.0    |         | 
+
+- Library Dependencies:
+    - com.android.billingclient:billing:5.1.0
 
 
