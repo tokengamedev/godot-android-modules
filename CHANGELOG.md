@@ -25,7 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### AppNotification (1.1.1)
 
-- Updated library version to 6.0.1. It is backward compatible.
+- Minor bug fix related to sub text
 - Updated Kotlin version to 1.10.1
   
 #### Google Play Billing (1.0.1)
