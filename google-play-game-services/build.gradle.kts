@@ -48,6 +48,6 @@ apply<GdapPlugin>()
 
 dependencies {
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.1")
     implementation("com.google.android.gms:play-services-games-v2:17.0.0")
 }

@@ -180,7 +180,10 @@ class NotificationHelper (private val context: Context){
         if (notifyOptions.expandable == NotificationOptions.EXPANDABLE_TEXT){
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(message))
         }
-        builder.setSubText(notifyOptions.subText)
+
+        if (notifyOptions.subText.isNotEmpty())
+            builder.setSubText(notifyOptions.subText)
+
         // Sets the default sounds and vibrations mode
         builder.setDefaults(Notification.DEFAULT_ALL)
         builder.setColorized(false)
@@ -222,7 +225,7 @@ class NotificationHelper (private val context: Context){
                 if(notifyOptions.expandable == NotificationOptions.EXPANDABLE_IMAGE){
                     builder.setStyle(NotificationCompat.BigPictureStyle()
                         .bigPicture(largeIcon)
-                        .bigLargeIcon(null)
+                        .bigLargeIcon(largeIcon)
                         )
                 }
 

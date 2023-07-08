@@ -16,7 +16,7 @@ extra.apply {
     set("outputLocation",  "${rootDir}/bin")
     set("moduleName", "GooglePlayBilling")
     set("binary_type", "local")
-    set("remoteDependencies", "\"com.android.billingclient:billing:5.1.0\"")
+    set("remoteDependencies", "\"com.android.billingclient:billing:6.0.1\"")
 }
 
 android {
@@ -48,8 +48,8 @@ apply<GdapPlugin>()
 
 dependencies {
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.0")
-    implementation("com.android.billingclient:billing:5.1.0")
-    implementation("com.android.billingclient:billing-ktx:5.1.0")
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.android.billingclient:billing:6.0.1")
+    implementation("com.android.billingclient:billing-ktx:6.0.1")
 }

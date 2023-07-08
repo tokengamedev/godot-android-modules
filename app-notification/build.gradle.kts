@@ -8,7 +8,7 @@ apply {
 
 // Version of the Module. It will be used for creating file
 // file name = "{moduleName}.{project.version}.{build_type/variant}.aar"
-version = "1.1.0"
+version = "1.1.1"
 
 // all the build outputs under one location
 setBuildDir("${rootProject.buildDir}/${project.name}")
@@ -52,6 +52,6 @@ apply<GdapPlugin>()
 
 dependencies{
     compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.1")
 //    implementation(kotlin("stdlib", "1.6.21"))
 }

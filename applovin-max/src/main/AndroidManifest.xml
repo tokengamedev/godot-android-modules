@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <application>
+        <meta-data
+            android:name="org.godotengine.plugin.v1.AppLovinMax"
+            android:value="gaml.applovinmax.AppLovinMaxPlugin" />
+    </application>
+
+</manifest>

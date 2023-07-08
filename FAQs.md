@@ -23,4 +23,3 @@ Note: I understand the code maintainers for various plugins are busy in various 
 ###### 3. How to add a new Plugin to the overall build?
 
 It is simple, copy one of the existing modules and rename, modify and refactor as per your needs and then add your new plugin name into the **settings.gradle.kts**. Done.
-

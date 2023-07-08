@@ -2,6 +2,7 @@
 .gradle
 .idea
 .vs
+.vscode
 */build
 /bin
 /captures
