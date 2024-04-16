@@ -6,6 +6,13 @@ It enables the app made in Godot to notify the end-user outside the app in andro
 
 To understand more about the Notification feature in android, go through the [documentation](https://developer.android.com/guide/topics/ui/notifiers/notifications).
 
+
+## About Android Notification:
+
+A notification is a message that Android displays outside your Game's UI to provide the user with reminders, communication from other people, or other timely information from your game. 
+
+A notification message format has been 
+
 ## Basic Usage:
 
 To access the plugin you have to use the standard code for Godot plugin in the code
@@ -73,6 +80,16 @@ Show notification at repeating interval of time.
 notification_plugin.setupRepeatingNotification(channelId, notificationId, title, message, delay, interval)
   
 ```
+
+#### d. Tagged Notification:
+
+To further classify the notification, use `showTaggedNotification`. This can be used for all the three types of notifications.
+
+```gdscript
+notifier.showTaggedNotification(CHANNEL_ID, NOTIFICATION_ID, tag, title, message, delay, interval)
+```
+
+
 ### 2. Cancelling Notification:
 
 Cancel notification that are pending or active.
@@ -122,6 +139,18 @@ Notes:
 * color_id should be mentioned in an xml file under **`/android/build/res/values`**
 * all ot the attributes inside options are optional.If not provided, then default values will be picked up. Check [NotificationOption](#notificationoption) for more details.
 
+### 5. Group notification:
+
+Group multiple notifications under a single group. To group notification add the `group_key`, `group_summary_id` and `group_summary_text` into the notification options for the notification
+
+```gdscript
+var notification_options ={
+  ...
+  "group_key": "com.gaml.demo", 
+  "group_summary_id": 2000, 
+  "group_summary_text": "Summary",
+}
+```
 
 ## APIs
 
@@ -243,18 +272,7 @@ Holds the notification info of a notification
   Gets all the active notifications that has not been cancelled by the user.
 
   **Returns**
-  - **{notifications: [[NotificationInfo](#notificationinfo)]**} summary details of all the active notifications
+  - **notifications: [[NotificationInfo](#notificationinfo)]** summary details of all the active notifications
 
 ### Signals
    - None
-
-## Developer Notes:
-
-|             | Minimum  | Maximum |
-|-------------|----------|---------|
-| Android SDK | 23       | 32      |
-| Java/JDK    | 11       |         |
-| Kotlin      | 1.8.0    |         | 
-
-    
-  

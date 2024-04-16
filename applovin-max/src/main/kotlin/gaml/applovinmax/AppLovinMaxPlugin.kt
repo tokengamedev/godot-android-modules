@@ -5,20 +5,17 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import com.applovin.mediation.*
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.applovin.mediation.ads.MaxRewardedAd
-import com.applovin.mediation.ads.MaxRewardedInterstitialAd
 import com.applovin.sdk.AppLovinPrivacySettings
 import com.applovin.sdk.AppLovinSdk
-import com.applovin.sdk.AppLovinSdkSettings
 import org.godotengine.godot.Dictionary
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
 import org.godotengine.godot.plugin.UsedByGodot
-import java.security.InvalidParameterException
+
 import kotlin.math.pow
 /**
  * Android plugin to wrap Applovin SDK so that Ads can be shown in games built with Godot
@@ -274,18 +271,18 @@ class AppLovinMaxPlugin(godot: Godot): GodotPlugin(godot) {
         Log.i(TAG, "Created Interstitial AD :" + interstitialAd?.toString())
         interstitialAd!!.setListener( object: MaxAdListener {
 
-            override fun onAdLoaded(ad: MaxAd?) {
+            override fun onAdLoaded(ad: MaxAd) {
                 Log.i(TAG, "Interstitial AD loaded.")
                 emitSignal(INTERSTITIAL_AD_LOADED, AdsHelper.getAdDetails(ad))
                 retryAttemptsInterstitial = 0
             }
 
-            override fun onAdDisplayed(ad: MaxAd?) {
+            override fun onAdDisplayed(ad: MaxAd) {
                 Log.i(TAG, "Interstitial AD displayed.")
                 emitSignal(INTERSTITIAL_AD_DISPLAYED, AdsHelper.getAdDetails(ad))
             }
 
-            override fun onAdHidden(ad: MaxAd?) {
+            override fun onAdHidden(ad: MaxAd) {
                 Log.i(TAG, "Interstitial AD hidden.")
                 emitSignal(INTERSTITIAL_AD_HIDDEN, AdsHelper.getAdDetails(ad))
                 if (options.autoloadAds){
@@ -294,12 +291,12 @@ class AppLovinMaxPlugin(godot: Godot): GodotPlugin(godot) {
 
             }
 
-            override fun onAdClicked(ad: MaxAd?) {
+            override fun onAdClicked(ad: MaxAd) {
                 Log.i(TAG, "Interstitial AD clicked.")
                 emitSignal(INTERSTITIAL_AD_CLICKED, AdsHelper.getAdDetails(ad))
             }
 
-            override fun onAdLoadFailed(adUnitId: String?, error: MaxError?) {
+            override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 Log.i(TAG, "Interstitial AD load failed. [$error]")
 
                 if (options.retryOnLoadFailure && retryAttemptsInterstitial < options.maxRetries){
@@ -311,14 +308,14 @@ class AppLovinMaxPlugin(godot: Godot): GodotPlugin(godot) {
                     }, delayMillis)
 
                 }else {
-                    emitSignal(INTERSTITIAL_AD_LOAD_FAILED, adUnitId?: "", AdsHelper.getAdError(error) )
+                    emitSignal(INTERSTITIAL_AD_LOAD_FAILED, adUnitId, AdsHelper.getAdError(error) )
                 }
 
             }
 
-            override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
+            override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 Log.i(TAG, "Interstitial AD display failed. [$error]")
-                emitSignal(INTERSTITIAL_AD_DISPLAY_FAILED, ad?.adUnitId ?: "", AdsHelper.getAdError(error))
+                emitSignal(INTERSTITIAL_AD_DISPLAY_FAILED, ad.adUnitId ?: "", AdsHelper.getAdError(error))
                 loadAd(INTERSTITIAL_AD)
             }
         })
@@ -332,18 +329,18 @@ class AppLovinMaxPlugin(godot: Godot): GodotPlugin(godot) {
     private fun createRewardedAd(adUnitId: String){
         rewardedAd= MaxRewardedAd.getInstance(adUnitId, currentActivity)
         rewardedAd!!.setListener(object: MaxRewardedAdListener{
-            override fun onAdLoaded(ad: MaxAd?) {
+            override fun onAdLoaded(ad: MaxAd) {
                 Log.i(TAG, "Rewarded AD loaded.")
                 emitSignal(REWARDED_AD_LOADED,  AdsHelper.getAdDetails(ad))
                 retryAttemptsRewarded = 0
             }
 
-            override fun onAdDisplayed(ad: MaxAd?) {
+            override fun onAdDisplayed(ad: MaxAd) {
                 Log.i(TAG, "Rewarded AD Displayed.")
                 emitSignal(REWARDED_AD_DISPLAYED,  AdsHelper.getAdDetails(ad))
             }
 
-            override fun onAdHidden(ad: MaxAd?) {
+            override fun onAdHidden(ad: MaxAd) {
                 Log.i(TAG, "Rewarded AD Hidden.")
                 emitSignal(REWARDED_AD_HIDDEN,  AdsHelper.getAdDetails(ad))
                 if (options.autoloadAds){
@@ -351,12 +348,12 @@ class AppLovinMaxPlugin(godot: Godot): GodotPlugin(godot) {
                 }
             }
 
-            override fun onAdClicked(ad: MaxAd?) {
+            override fun onAdClicked(ad: MaxAd) {
                 Log.i(TAG, "Rewarded AD Clicked.")
                 emitSignal(REWARDED_AD_CLICKED,  AdsHelper.getAdDetails(ad))
             }
 
-            override fun onAdLoadFailed(adUnitId: String?, error: MaxError?) {
+            override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
                 Log.i(TAG, "Rewarded AD Load failed. [$error]")
 
                 if (options.retryOnLoadFailure && retryAttemptsRewarded < options.maxRetries){
@@ -369,26 +366,26 @@ class AppLovinMaxPlugin(godot: Godot): GodotPlugin(godot) {
                     }, delayMillis)
 
                 }else {
-                    emitSignal(REWARDED_AD_LOAD_FAILED, adUnitId?: "", AdsHelper.getAdError(error) )
+                    emitSignal(REWARDED_AD_LOAD_FAILED, AdsHelper.getAdError(error) )
                 }
             }
 
-            override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
+            override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
                 Log.i(TAG, "Rewarded AD Display failed. [$error]")
-                emitSignal(REWARDED_AD_DISPLAY_FAILED, ad?.adUnitId ?: "", AdsHelper.getAdError(error) )
+                emitSignal(REWARDED_AD_DISPLAY_FAILED, AdsHelper.getAdError(error) )
                 loadAd(REWARDED_AD)
             }
 
-            override fun onUserRewarded(ad: MaxAd?, reward: MaxReward?) {
+            override fun onUserRewarded(ad: MaxAd, reward: MaxReward) {
                 Log.i(TAG, "Rewarded AD - User Rewarded. $reward")
                 emitSignal(REWARDED_AD_USER_REWARDED, AdsHelper.getAdDetails(ad), AdsHelper.getAdReward(reward) )
             }
 
             @Deprecated("Deprecated in Java")
-            override fun onRewardedVideoStarted(ad: MaxAd?) {}
+            override fun onRewardedVideoStarted(ad: MaxAd) {}
 
             @Deprecated("Deprecated in Java")
-            override fun onRewardedVideoCompleted(ad: MaxAd?) {}
+            override fun onRewardedVideoCompleted(ad: MaxAd) {}
         })
         retryAttemptsRewarded = 0
     }

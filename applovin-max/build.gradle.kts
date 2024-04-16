@@ -11,7 +11,8 @@ apply {
 version = "1.0.0"
 
 // all the build outputs under one location
-setBuildDir("${rootProject.buildDir}/${project.name}")
+//setBuildDir("${rootProject.buildDir}/${project.name}")
+layout.buildDirectory.set(rootProject.layout.buildDirectory.dir(project.name))
 
 // Needed to create GDAP file
 extra.apply {
@@ -24,10 +25,10 @@ extra.apply {
 
 android {
     namespace="gaml.applovinmax"
-    compileSdk = 32
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 24
         //targetSdk = 32
     }
 
@@ -37,11 +38,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -51,8 +52,9 @@ apply<GdapPlugin>()
 
 
 dependencies{
-    compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.10.1")
+    //compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
+    implementation("org.godotengine:godot:4.1.3.stable")
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("com.applovin:applovin-sdk:11.10.1")
     implementation("com.google.android.gms:play-services-ads-identifier")
 //    implementation(kotlin("stdlib", "1.6.21"))

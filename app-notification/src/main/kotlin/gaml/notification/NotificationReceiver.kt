@@ -3,7 +3,7 @@ package gaml.notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+
 
 class NotificationReceiver: BroadcastReceiver() {
 
@@ -33,9 +33,13 @@ class NotificationReceiver: BroadcastReceiver() {
             intent.getStringExtra(NotificationOptions.TAG_LARGE_ICON),
             intent.getStringExtra(NotificationOptions.TAG_COLOR),
             intent.getIntExtra(NotificationOptions.TAG_EXPANDABLE, 0),
+            intent.getStringExtra(NotificationOptions.TAG_EXPANDABLE_IMAGE),
             intent.getStringExtra(NotificationOptions.TAG_CATEGORY),
             intent.getStringExtra(NotificationOptions.TAG_SUB_TEXT),
-
+            intent.getStringExtra(NotificationOptions.TAG_GROUP_KEY),
+            intent.getIntExtra(NotificationOptions.TAG_SUMMARY_ID, 0),
+            intent.getStringExtra(NotificationOptions.TAG_SUMMARY_TEXT),
+            intent.getStringExtra(NotificationOptions.TAG_TAG),
         )
 
         val notifyHelper = NotificationHelper(context)

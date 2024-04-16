@@ -1,10 +1,14 @@
-plugins{
+plugins {
     id("com.android.library")
-    kotlin("android")
+    id("org.jetbrains.kotlin.android")
 }
-apply {
-    plugin("kotlin-android")
-}
+//plugins{
+//    id("com.android.library")
+//    kotlin("android")
+//}
+//apply {
+//    plugin("kotlin-android")
+//}
 
 repositories {
     maven(url = "https://maven.ogury.co")
@@ -14,7 +18,8 @@ repositories {
 version = "1.0.0"
 
 // all the build outputs under one location
-setBuildDir("${rootProject.buildDir}/${project.name}")
+//setBuildDir("${rootProject.buildDir}/${project.name}")
+layout.buildDirectory.set(rootProject.layout.buildDirectory.dir(project.name))
 
 extra.apply {
     set("outputLocation",  "${rootDir}/bin")
@@ -27,24 +32,24 @@ extra.apply {
 
 android {
     namespace="gaml.ogury.consent.manager"
-    compileSdk = 32
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 24
 //        targetSdk = 32
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
+//    buildTypes {
+//        release {
+//            isMinifyEnabled = false
+//        }
+//    }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -53,7 +58,6 @@ android {
 apply<GdapPlugin>()
 
 dependencies{
-    compileOnly(fileTree(mapOf("dir" to "$rootDir/libs/", "include" to listOf("godot-lib*.aar"))))
-    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("org.godotengine:godot:4.1.3.stable")
     implementation("co.ogury:ogury-sdk:5.5.0")
 }
