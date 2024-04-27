@@ -1,0 +1,25 @@
+[versions]
+godot = "4.2.2.stable"
+androidGradlePlugin = "8.2.2"
+gradle = "8.2.2"
+kotlin = "1.9.10"
+ktx = "1.12.0"
+playGameServices = "20.0.0"
+reviewServices = "2.0.1"
+playBilling = "6.2.0"
+
+
+[libraries]
+godot-library = { group = "org.godotengine", name = "godot", version.ref = "godot"}
+gradle-tools = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
+play-services-games = { group = "com.google.android.gms", name = "play-services-games-v2", version.ref = "playGameServices" }
+play-services-review = { group = "com.google.android.play", name = "review", version.ref = "reviewServices" }
+play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "playBilling" }
+
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
